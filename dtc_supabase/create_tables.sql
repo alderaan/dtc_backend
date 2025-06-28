@@ -50,11 +50,31 @@ CREATE TABLE public.dtc_profile_details (
     created_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
+CREATE TABLE public.dtc_raw_google_search_results (
+    id bigserial PRIMARY KEY,
+    keyword_id bigint,
+    country_code text,
+    data jsonb NOT NULL,
+    loaded_at timestamp with time zone DEFAULT now()
+);
+
+CREATE TABLE public.dtc_raw_instagram_profiles (
+    id bigserial PRIMARY KEY,
+    keyword_id bigint,
+    country_code text,
+    data jsonb NOT NULL,
+    loaded_at timestamp with time zone DEFAULT now()
+);
+
 -- Create indexes on frequently queried columns for better performance.
 CREATE INDEX idx_dtc_profiles_username ON public.dtc_profiles(username);
 CREATE INDEX idx_dtc_profiles_country ON public.dtc_profiles(country);
 CREATE INDEX idx_dtc_profile_details_profile_id ON public.dtc_profile_details(profile_id);
 CREATE INDEX idx_dtc_profile_details_created_at ON public.dtc_profile_details(created_at DESC);
+CREATE INDEX idx_dtc_raw_google_search_results_keyword_id
+ON public.dtc_raw_google_search_results(keyword_id);
+CREATE INDEX idx_dtc_raw_instagram_profiles_keyword_id
+ON public.dtc_raw_instagram_profiles(keyword_id);
 
 -- Function and Trigger to automatically update the 'updated_at' timestamp on the profiles table.
 CREATE OR REPLACE FUNCTION public.handle_dtc_updated_at()
@@ -69,6 +89,7 @@ CREATE TRIGGER on_dtc_profiles_update
   BEFORE UPDATE ON public.dtc_profiles
   FOR EACH ROW
   EXECUTE PROCEDURE public.handle_dtc_updated_at();
+  
 
 
 -- UPDATED VIEW to include the new country column from dtc_profiles
@@ -108,3 +129,4 @@ LEFT JOIN
     public.dtc_keywords k ON latest_pk.keyword_id = k.id
 ORDER BY
     p.id, pd.created_at DESC;
+

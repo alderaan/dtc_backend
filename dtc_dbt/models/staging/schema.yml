@@ -1,0 +1,59 @@
+version: 2
+
+sources:
+  - name: public
+    database: postgres
+    schema: public
+    tables:
+      - name: dtc_raw_google_search_results
+        description: "Raw Google search results from Apify scraper."
+        columns:
+          - name: id
+            description: "Primary key for the raw search results."
+            tests:
+              - unique
+              - not_null
+          - name: keyword_id
+            description: "Foreign key to the dtc_keywords table."
+            tests:
+              - not_null
+          - name: data
+            description: "JSONB blob containing the search results."
+            tests:
+              - not_null
+
+models:
+  - name: stg_google_search_results
+    description: "Staging model for raw Google search results. Renames columns for clarity."
+    columns:
+      - name: google_search_result_id
+        description: "Primary key for the raw search results."
+        tests:
+          - unique
+          - not_null
+      - name: keyword_id
+        description: "Foreign key to the dtc_keywords table."
+        tests:
+          - not_null
+
+  - name: stg_google_search_organic_results
+    description: "Staging model that unnests organic results from Google search results."
+    columns:
+      - name: url
+        description: "URL from the organic search result."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "LIKE '%instagram.com%'"
+
+  - name: google_search_instagram_profiles
+    description: "Final model that extracts Instagram usernames from Google search results."
+    columns:
+      - name: username
+        description: "Extracted Instagram username."
+        tests:
+          - not_null
+      - name: keyword_id
+        description: "Foreign key to the dtc_keywords table."
+        tests:
+          - not_null 
