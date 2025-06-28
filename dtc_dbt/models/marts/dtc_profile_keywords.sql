@@ -1,10 +1,11 @@
 {{
     config(
         materialized='incremental',
-        unique_key=['profile_id', 'keyword_id'],
-        schema='public'
+        unique_key=['profile_id', 'keyword_id']
     )
 }}
+
+{% set profiles_relation = ref('dtc_profiles') %}
 
 WITH source_profiles AS (
     SELECT
@@ -17,7 +18,7 @@ final_profiles AS (
     SELECT
         id as profile_id,
         username
-    FROM {{ ref('dtc_profiles') }}
+    FROM {{ target.schema }}.dtc_profiles
 )
 
 SELECT
