@@ -1,0 +1,208 @@
+{
+    "name": "DTC - Get Profile Details",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          450,
+          350
+        ],
+        "id": "e0e457e4-230c-48a5-8392-747f2e1a49f5",
+        "name": "When clicking ‘Execute workflow’"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT id, username FROM public.dtc_profiles WHERE status = 'active';",
+          "options": {}
+        },
+        "id": "8c59f086-64d8-4f81-83d8-574f17849618",
+        "name": "1. Get Active Profiles",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          730,
+          350
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "Px7gJAbNSvpFpTiv",
+            "name": "Supabase"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{$env.APIFY_API_KEY}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "directUrls",
+                "value": "={{ [`https://www.instagram.com/${$json.username}/`] }}"
+              },
+              {
+                "name": "resultsType",
+                "value": "details"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json",
+                "splitIntoItems": true,
+                "responsePropertyName": "body"
+              }
+            }
+          }
+        },
+        "id": "278c2e71-419b-4395-9ac9-93e155c8266e",
+        "name": "2. Instagram Scraper",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          970,
+          210
+        ],
+        "credentials": {}
+      },
+      {
+        "parameters": {
+          "mode": "mergeByKey",
+          "key1": "username",
+          "key2": "username",
+          "options": {}
+        },
+        "id": "2d1f93f6-b183-4a1b-9f6b-71286de91307",
+        "name": "3. Merge Profile and Detail Data",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1210,
+          350
+        ]
+      },
+      {
+        "parameters": {
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "dtc_profile_details",
+            "mode": "list",
+            "cachedResultName": "dtc_profile_details"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "profile_id": "={{$json.id}}",
+              "full_name": "={{$json.fullName}}",
+              "biography": "={{$json.biography}}",
+              "external_url": "={{$json.externalUrl}}",
+              "followers_count": "={{$json.followersCount}}",
+              "following_count": "={{$json.followsCount}}",
+              "posts_count": "={{$json.postsCount}}"
+            }
+          },
+          "options": {}
+        },
+        "id": "2816b325-15a0-47b2-b430-8041c2d0f3a6",
+        "name": "4. Insert Profile Details",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1470,
+          350
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "Px7gJAbNSvpFpTiv",
+            "name": "Supabase"
+          }
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "1. Get Active Profiles",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "1. Get Active Profiles": {
+        "main": [
+          [
+            {
+              "node": "2. Instagram Scraper",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "3. Merge Profile and Detail Data",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "2. Instagram Scraper": {
+        "main": [
+          [
+            {
+              "node": "3. Merge Profile and Detail Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "3. Merge Profile and Detail Data": {
+        "main": [
+          [
+            {
+              "node": "4. Insert Profile Details",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": false,
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "versionId": "b1b1f9b3-6c8c-4f10-ae40-155099b646c2",
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "id": "GetInstagramDetails",
+    "tags": []
+  }
+  

@@ -1,0 +1,302 @@
+{
+    "name": "DTC",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -200,
+          60
+        ],
+        "id": "96046f60-23ab-405d-8d66-cb5ac5735de3",
+        "name": "When clicking ‘Execute workflow’"
+      },
+      {
+        "parameters": {
+          "language": "python",
+          "pythonCode": "import pandas as pd\nfrom urllib.parse import urlparse\n\n# This script processes the Google Search results.\n# For each result from a specific keyword search, it extracts the Instagram username\n# and pairs it with the ID of the keyword used for the search.\n\n# -----------------------------------------------------------------------------\n# CONFIGURATION FLAGS\n# -----------------------------------------------------------------------------\nINCLUDE_PROFILES_ONLY = True\nINCLUDE_FROM_POSTS = True\nINCLUDE_FROM_REELS = True\nnon_user_paths = {\"p\", \"reel\", \"tv\", \"explore\", \"stories\", \"directory\"}\n\n# -----------------------------------------------------------------------------\n# LOGIC\n# -----------------------------------------------------------------------------\nresults_to_process = []\n\n# Loop through each item from the Merge node. Each item contains\n# the original keyword data and the Google Search results for that keyword.\nfor item in items:\n    merged_item = item.get('json', {})\n    \n    # Get the ID of the keyword from the 'Get Keywords' node output\n    keyword_id = merged_item.get('id')\n    if not keyword_id:\n        continue # Skip if there's no keyword ID\n\n    # Extract the list of search results\n    organic_results_list = merged_item.get('organicResults', [])\n\n    for result in organic_results_list:\n        url = result.get('url', \"\")\n        if \"instagram.com\" not in url:\n            continue\n\n        clean_url = url.split(\"?\")[0].rstrip(\"/\")\n        parsed = urlparse(clean_url)\n        path_parts = [part for part in parsed.path.split(\"/\") if part]\n\n        if not path_parts:\n            continue\n\n        username = None\n        # Logic to extract username from different URL structures\n        if len(path_parts) == 1:\n            potential_username = path_parts[0].lower()\n            if potential_username not in non_user_paths and INCLUDE_PROFILES_ONLY:\n                username = potential_username\n        elif len(path_parts) >= 2:\n            potential_username = path_parts[0].lower()\n            content_type = path_parts[1].lower()\n            if potential_username in non_user_paths:\n                continue\n            if (content_type == \"p\" and INCLUDE_FROM_POSTS) or \\\n               (content_type == \"reel\" and INCLUDE_FROM_REELS):\n                username = potential_username\n        \n        if username:\n            results_to_process.append({\n                \"username\": username,\n                \"keyword_id\": keyword_id\n            })\n\n# Deduplicate the final list to reduce load on the database\n# We only want to try inserting each unique username/keyword_id pair once per run.\n# A pandas DataFrame is great for this.\nif not results_to_process:\n    return []\n\ndf = pd.DataFrame(results_to_process)\ndf.drop_duplicates(subset=['username', 'keyword_id'], inplace=True)\n\nreturn df.to_dict('records')"
+        },
+        "id": "0e77279b-9cb0-4617-987f-a737c9d29bf8",
+        "name": "Process Search Results",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1140,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "dtc_keywords",
+            "mode": "list",
+            "cachedResultName": "dtc_keywords"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          160,
+          20
+        ],
+        "id": "4173baff-1cb8-47dc-885d-64559a623379",
+        "name": "Get Keywords",
+        "credentials": {
+          "postgres": {
+            "id": "Px7gJAbNSvpFpTiv",
+            "name": "Supabase"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          860,
+          0
+        ],
+        "id": "d098a5c2-7013-4108-8464-6171b014f580",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.apify.com/v2/acts/apify~google-search-scraper/run-sync-get-dataset-items",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{$env.APIFY_API_KEY}}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "queries",
+                "value": "=instagram {{decodeURIComponent($json.search_term)}}"
+              },
+              {
+                "name": "numPages",
+                "value": "={{1}}"
+              },
+              {
+                "name": "resultsPerPage",
+                "value": "={{100}}"
+              },
+              {
+                "name": "countryCode",
+                "value": "th"
+              },
+              {
+                "name": "languageCode",
+                "value": "th"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "id": "5c5a72b2-0c8d-4344-8507-9649650ea955",
+        "name": "Google Search Scraper",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          520,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "dtc_profiles",
+            "mode": "list",
+            "cachedResultName": "dtc_profiles"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "username": "={{$json.username}}"
+            },
+            "matchingColumns": [
+              "username"
+            ]
+          },
+          "options": {
+            "passThrough": true
+          }
+        },
+        "id": "ff877a56-b072-4e01-a1d2-7489ce47535b",
+        "name": "Upsert Profile",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1440,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "Px7gJAbNSvpFpTiv",
+            "name": "Supabase"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "dtc_profile_keywords",
+            "mode": "list",
+            "cachedResultName": "dtc_profile_keywords"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "profile_id": "={{$json.id}}",
+              "keyword_id": "={{$json.keyword_id}}"
+            }
+          },
+          "options": {
+            "skipOnConflict": true
+          }
+        },
+        "id": "18f0a519-aa58-45e0-84a5-17793d56a2bb",
+        "name": "Link Profile to Keyword",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1740,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "Px7gJAbNSvpFpTiv",
+            "name": "Supabase"
+          }
+        }
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Get Keywords",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Keywords": {
+        "main": [
+          [
+            {
+              "node": "Google Search Scraper",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Process Search Results": {
+        "main": [
+          [
+            {
+              "node": "Upsert Profile",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "Process Search Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Search Scraper": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upsert Profile": {
+        "main": [
+          [
+            {
+              "node": "Link Profile to Keyword",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": false,
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "versionId": "729f1cb6-977b-4012-882a-4ccfb13843c5",
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "51640c996f1bc16e770e0f36658272c75447d976479deb398e76231883cf7389"
+    },
+    "id": "yzCsWROq7eb9h7ry",
+    "tags": []
+  }
+  

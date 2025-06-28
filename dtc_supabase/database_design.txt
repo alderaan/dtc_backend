@@ -1,0 +1,25 @@
+
+```
++--------------------+      +-----------------------+      +------------------+
+|   dtc_profiles     |      |  dtc_profile_details  |      |   dtc_keywords   |
+|--------------------|      |-----------------------|      |------------------|
+| id (PK)            |      | id (PK)               |      | id (PK)          |
+| username           |----<>| profile_id (FK)       |      | search_term      |
+| country            |      | full_name             |      | country          |
+| status             |      | biography             |      | category         |
+| notes              |      | external_url          |      | keyword_en       |
+| created_at         |      | followers_count       |      | created_at       |
+| updated_at         |      | following_count       |      +------------------+
++--------------------+      | posts_count           |
+                            | created_at            |
+                            +-----------------------+
+                                     |
+                                     |
+                       +------------------------+
+                       | dtc_profile_keywords   | (Junction Table)
+                       |------------------------|
+                       | profile_id (FK)        |
+                       | keyword_id (FK)        |
+                       | created_at             |
+                       +------------------------+
+```

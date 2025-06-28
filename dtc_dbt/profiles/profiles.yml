@@ -1,0 +1,13 @@
+dtc_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      # Use env_var() to read from environment variables
+      host: "{{ env_var('DBT_DB_HOST') }}"       # e.g., 'supabase_db_service_name'
+      user: "{{ env_var('DBT_DB_USER') }}"       # e.g., 'postgres'
+      password: "{{ env_var('DBT_DB_PASSWORD') }}" # Your Supabase DB password
+      port: 5432
+      dbname: "{{ env_var('DBT_DB_NAME') }}"     # e.g., 'postgres'
+      schema: "{{ env_var('DBT_DB_SCHEMA') }}"   # e.g., 'public'
+      threads: 4

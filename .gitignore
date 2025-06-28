@@ -1,0 +1,87 @@
+# ===================================================================
+# General & Secrets
+# ===================================================================
+# Environment variables - contains secrets and local configs
+.env*
+.env.*.local
+*.env
+
+# Local credentials and configuration files
+credentials.json
+.credentials/
+*.pem
+*.key
+
+# ===================================================================
+# dbt (Data Build Tool)
+# ===================================================================
+# Compiled models, logs, and dependencies
+/dbt_project/target/
+/dbt_project/logs/
+/dbt_project/dbt_packages/
+
+# Local dbt profiles configuration (should never be committed)
+/dbt_project/profiles.yml
+
+# dbt build artifacts
+/dbt_project/dbt_state/
+
+
+# ===================================================================
+# n8n
+# ===================================================================
+# n8n stores local user data and encryption keys here by default
+.n8n/
+database.sqlite
+
+# If you're running n8n locally with Docker and storing data in a volume
+# mapped to a local folder, add that folder name here.
+# e.g., /n8n-local-data/
+
+
+# ===================================================================
+# Python & Virtual Environments
+# ===================================================================
+# Common for running dbt-core or other scripts
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+
+# ===================================================================
+# IDE & Editor Configuration
+# ===================================================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+
+# ===================================================================
+# Operating System Files
+# ===================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+
+# ===================================================================
+# Other Common Files
+# ===================================================================
+# Node.js dependencies (if you use any JS tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Compressed files
+*.zip
+*.tar.gz
