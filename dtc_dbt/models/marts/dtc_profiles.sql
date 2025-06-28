@@ -1,7 +1,7 @@
 {{
     config(
         materialized='incremental',
-        unique_key='username'
+        unique_key='id'
     )
 }}
 
@@ -12,6 +12,7 @@ WITH extracted_profiles AS (
 )
 
 SELECT
+    {{ dbt_utils.generate_surrogate_key(['username']) }} as id,
     username,
     'th' as country,
     'pending_review'::public.dtc_profile_status as status,

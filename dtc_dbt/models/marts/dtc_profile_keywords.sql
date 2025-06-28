@@ -1,11 +1,9 @@
 {{
     config(
         materialized='incremental',
-        unique_key=['profile_id', 'keyword_id']
+        unique_key='profile_keyword_id'
     )
 }}
-
-{% set profiles_relation = ref('dtc_profiles') %}
 
 WITH source_profiles AS (
     SELECT
@@ -14,24 +12,30 @@ WITH source_profiles AS (
     FROM {{ ref('google_search_instagram_profiles') }}
 ),
 
-final_profiles AS (
+dtc_profiles AS (
     SELECT
-        id as profile_id,
+        id,
         username
-    FROM {{ target.schema }}.dtc_profiles
+    FROM {{ ref('dtc_profiles') }}
+),
+
+profile_keywords AS (
+    SELECT
+        dp.id as profile_id,
+        sp.keyword_id
+    FROM source_profiles sp
+    JOIN dtc_profiles dp ON sp.username = dp.username
 )
 
 SELECT
-    fp.profile_id,
-    sp.keyword_id,
+    {{ dbt_utils.generate_surrogate_key(['profile_id', 'keyword_id']) }} as profile_keyword_id,
+    profile_id,
+    keyword_id,
     now() as created_at
-FROM
-    source_profiles sp
-JOIN
-    final_profiles fp ON sp.username = fp.username
+FROM profile_keywords
 
 {% if is_incremental() %}
 
-  WHERE (fp.profile_id, sp.keyword_id) NOT IN (SELECT profile_id, keyword_id FROM {{ this }})
+  WHERE {{ dbt_utils.generate_surrogate_key(['profile_id', 'keyword_id']) }} NOT IN (SELECT profile_keyword_id FROM {{ this }})
 
 {% endif %} 
