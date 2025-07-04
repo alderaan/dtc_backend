@@ -7,14 +7,15 @@
 
 WITH extracted_profiles AS (
     SELECT DISTINCT
-        username
+        username,
+        country_code
     FROM {{ ref('google_search_instagram_profiles') }}
 )
 
 SELECT
     {{ dbt_utils.generate_surrogate_key(['username']) }} as id,
     username,
-    'th' as country,
+    country_code as country,
     'pending_review'::public.dtc_profile_status as status,
     now() as created_at,
     now() as updated_at

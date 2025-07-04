@@ -5,6 +5,7 @@ WITH organic_results AS (
 url_parts AS (
     SELECT
         keyword_id,
+        country_code,
         url,
         split_part(url, '?', 1) AS url_without_query,
         regexp_split_to_array(trim(trailing '/' from split_part(url, '?', 1)), '/') AS path_parts
@@ -15,6 +16,7 @@ url_parts AS (
 extracted_usernames AS (
     SELECT
         keyword_id,
+        country_code,
         url,
         CASE
             -- e.g. https://www.instagram.com/username/
@@ -31,7 +33,8 @@ extracted_usernames AS (
 
 SELECT DISTINCT
     username,
-    keyword_id
+    keyword_id,
+    country_code
 FROM
     extracted_usernames
 WHERE
