@@ -62,18 +62,6 @@ models:
           - dbt_utils.expression_is_true:
               expression: "LIKE '%instagram.com%'"
 
-  - name: google_search_instagram_profiles
-    description: "Final model that extracts Instagram usernames from Google search results."
-    columns:
-      - name: username
-        description: "Extracted Instagram username."
-        data_tests:
-          - not_null
-      - name: keyword_id
-        description: "Foreign key to the dtc_keywords table."
-        data_tests:
-          - not_null
-
   - name: stg_instagram_profiles
     description: "Staging model for raw Instagram profiles data. Renames columns for clarity."
     columns:
