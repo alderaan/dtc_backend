@@ -9,5 +9,5 @@ dtc_dbt:
       password: "{{ env_var('DBT_DB_PASSWORD') }}" # Your Supabase DB password
       port: 5432
       dbname: "{{ env_var('DBT_DB_NAME') }}"     # e.g., 'postgres'
-      schema: public
+      schema: dtc
       threads: 4

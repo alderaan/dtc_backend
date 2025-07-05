@@ -30,8 +30,9 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   dtc_dbt:
-    +schema: dtc
     staging:
+      +schema: staging
       +materialized: view
     marts:
+      +schema: marts
       +materialized: incremental
