@@ -50,7 +50,7 @@ CREATE TABLE public.dtc_profile_details (
     created_at timestamp with time zone NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.dtc_raw_google_search_results (
+CREATE TABLE dtc_raw.google_search_results (
     id bigserial PRIMARY KEY,
     keyword_id bigint,
     country_code text,
@@ -58,13 +58,13 @@ CREATE TABLE public.dtc_raw_google_search_results (
     loaded_at timestamp with time zone DEFAULT now()
 );
 
-create table public.dtc_raw_instagram_profiles (
+create table dtc_raw.instagram_profiles (
   id bigserial not null,
   profile_id text not null,
   data jsonb not null,
   loaded_at timestamp with time zone null default now(),
-  constraint dtc_raw_instagram_profiles_pkey primary key (id),
-  constraint dtc_raw_instagram_profiles_profile_id_loaded_at_key unique (profile_id, loaded_at)
+  constraint instagram_profiles_pkey primary key (id),
+  constraint instagram_profiles_profile_id_loaded_at_key unique (profile_id, loaded_at)
 ) TABLESPACE pg_default;
 
 -- Create indexes on frequently queried columns for better performance.
