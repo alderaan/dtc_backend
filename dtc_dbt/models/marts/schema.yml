@@ -42,8 +42,8 @@ models:
         description: "Profile ID that matches dtc_profiles.id."
         data_tests:
           - not_null
-      - name: instagram_profile_id
-        description: "Primary key from the raw Instagram profiles table."
+      - name: dtc_raw_instagram_profile_id
+        description: "Primary key for the raw Instagram profiles (from dtc_raw_instagram_profiles.id)."
       - name: instagram_id
         description: "Instagram's internal ID for the profile."
       - name: url

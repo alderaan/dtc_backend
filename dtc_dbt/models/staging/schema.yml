@@ -65,8 +65,8 @@ models:
   - name: stg_instagram_profiles
     description: "Staging model for raw Instagram profiles data. Renames columns for clarity."
     columns:
-      - name: instagram_profile_id
-        description: "Primary key for the raw Instagram profiles."
+      - name: dtc_raw_instagram_profile_id
+        description: "Primary key for the raw Instagram profiles (from dtc_raw_instagram_profiles.id)."
         data_tests:
           - unique
           - not_null
