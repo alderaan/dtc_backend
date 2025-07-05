@@ -73,4 +73,41 @@ Our DBT pipeline transforms raw Google search results into structured Instagram 
 1.  **Install Dependencies**: From the `dtc_dbt` directory, run `dbt deps` to install packages like `dbt_utils`.
 2.  **Run the Pipeline**: From the `dtc_dbt` directory, run `dbt run`.
     -   To force a full rebuild of all models from scratch, run `dbt run --full-refresh`. This is useful if a model's logic has changed or data has become corrupted.
-3.  **Test Data Quality**: Run `dbt test` to execute any data tests defined in the `schema.yml` files (e.g., checking for nulls or duplicates). 
+3.  **Test Data Quality**: Run `dbt test` to execute any data tests defined in the `schema.yml` files (e.g., checking for nulls or duplicates).
+
+---
+
+### Managing Search Terms via Seeds and Snapshots
+
+To ensure our list of search terms is version-controlled and to maintain historical integrity, we use a combination of dbt Seeds and Snapshots.
+
+- **Seeds**: The `dtc_search_terms.csv` file in the `seeds` directory is the single source of truth for what search terms are currently active.
+- **Snapshots**: dbt snapshots are used to create a historical record of this data. This allows us to see what search terms were active at any point in time, even after they have been removed from the seed file.
+
+This is the standard dbt methodology for handling "Slowly Changing Dimensions."
+
+#### Schema Design for Seeds and Snapshots
+
+- **`dtc_seeds`**: Contains the live, current version of the search terms table, loaded directly from the CSV.
+- **`dtc_snapshots`**: Contains the historical, timestamped version of the search terms table. Rows in this schema are never deleted.
+
+#### Workflow for Updating Search Terms
+
+Whenever you need to add, remove, or edit a search term, you must follow these steps:
+
+1.  **Edit the CSV File**: Make your changes directly in `dtc_backend/dtc_dbt/seeds/dtc_search_terms.csv`.
+2.  **Commit the Change**: Commit the updated CSV file to your git repository. This is a crucial step for maintaining an auditable log.
+3.  **Run the dbt Commands**: To correctly apply your changes to the data warehouse, you must run the following dbt commands **in this specific order**. These commands should be run from the `~/dbt` directory where your `docker-compose.yml` is located.
+
+    1.  **Load the Seed Data:** This command updates the table in the `dtc_seeds` schema to match the current state of your CSV file.
+        ```bash
+        docker compose run --rm dbt seed
+        ```
+    2.  **Capture the Snapshot:** This command compares the newly seeded table to the last historical record and logs any changes.
+        ```bash
+        docker compose run --rm dbt snapshot
+        ```
+    3.  **Run Your Models:** This command runs all your regular transformations, which can now safely reference the updated historical data.
+        ```bash
+        docker compose run --rm dbt run
+        ``` 
