@@ -7,7 +7,7 @@ WITH source AS (
 renamed AS (
 
     SELECT
-        id as instagram_profile_id,
+        id as dtc_raw_instagram_profile_id,
         profile_id,
         data,
         loaded_at

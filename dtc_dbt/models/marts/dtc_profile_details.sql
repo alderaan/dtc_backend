@@ -11,7 +11,7 @@ WITH source AS (
 
 extracted AS (
     SELECT
-        instagram_profile_id,
+        dtc_raw_instagram_profile_id,
         profile_id,
         loaded_at,
         data->>'id' AS instagram_id,
@@ -43,7 +43,7 @@ final AS (
     SELECT
         {{ dbt_utils.generate_surrogate_key(['profile_id', 'loaded_at']) }} as id,
         profile_id,
-        instagram_profile_id,
+        dtc_raw_instagram_profile_id,
         instagram_id,
         url,
         fbid,
