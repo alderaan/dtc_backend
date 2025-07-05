@@ -19,7 +19,6 @@ joined AS (
         pd.profile_id,
         pd.instagram_profile_id,
         pd.instagram_id,
-        pd.data_id,
         pd.url,
         pd.fbid,
         pd.is_private,

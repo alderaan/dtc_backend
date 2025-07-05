@@ -46,8 +46,6 @@ models:
         description: "Primary key from the raw Instagram profiles table."
       - name: instagram_id
         description: "Instagram's internal ID for the profile."
-      - name: data_id
-        description: "ID from the data object."
       - name: url
         description: "Instagram profile URL."
       - name: fbid
