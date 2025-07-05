@@ -1,0 +1,119 @@
+version: 2
+
+models:
+  - name: dtc_profiles
+    description: "Final model containing Instagram profiles extracted from Google search results."
+    columns:
+      - name: id
+        description: "Surrogate key for the profile."
+        data_tests:
+          - unique
+          - not_null
+      - name: username
+        description: "Instagram username."
+        data_tests:
+          - not_null
+      - name: country
+        description: "Country code for the profile."
+      - name: status
+        description: "Status of the profile review process."
+
+  - name: google_search_instagram_profiles
+    description: "Intermediate model that extracts Instagram usernames from Google search results."
+    columns:
+      - name: username
+        description: "Extracted Instagram username."
+        data_tests:
+          - not_null
+      - name: keyword_id
+        description: "Foreign key to the dtc_keywords table."
+        data_tests:
+          - not_null
+
+  - name: dt_profile_details
+    description: "Final model containing detailed Instagram profile information from scraping."
+    columns:
+      - name: id
+        description: "Surrogate key for the profile details record."
+        data_tests:
+          - unique
+          - not_null
+      - name: profile_id
+        description: "Profile ID that matches dtc_profiles.id."
+        data_tests:
+          - not_null
+      - name: instagram_profile_id
+        description: "Primary key from the raw Instagram profiles table."
+      - name: instagram_id
+        description: "Instagram's internal ID for the profile."
+      - name: data_id
+        description: "ID from the data object."
+      - name: url
+        description: "Instagram profile URL."
+      - name: fbid
+        description: "Facebook ID associated with the profile."
+      - name: is_private
+        description: "Whether the profile is private."
+      - name: full_name
+        description: "Full name of the profile."
+      - name: input_url
+        description: "Original input URL used for scraping."
+      - name: username
+        description: "Instagram username."
+      - name: is_verified
+        description: "Whether the profile is verified."
+      - name: biography
+        description: "Profile biography text."
+      - name: has_channel
+        description: "Whether the profile has a channel."
+      - name: posts_count
+        description: "Number of posts on the profile."
+      - name: external_url
+        description: "External URL from the profile."
+      - name: follows_count
+        description: "Number of accounts the profile follows."
+      - name: profile_pic_url
+        description: "URL of the profile picture."
+      - name: followers_count
+        description: "Number of followers."
+      - name: igtv_video_count
+        description: "Number of IGTV videos."
+      - name: joined_recently
+        description: "Whether the account joined recently."
+      - name: profile_pic_url_hd
+        description: "High definition profile picture URL."
+      - name: is_business_account
+        description: "Whether this is a business account."
+      - name: external_url_shimmed
+        description: "Shimmed external URL."
+      - name: highlight_reel_count
+        description: "Number of highlight reels."
+      - name: business_category_name
+        description: "Business category name if applicable."
+      - name: created_at
+        description: "Timestamp when this record was created."
+        data_tests:
+          - not_null
+
+  - name: dt_profile_details_with_profiles
+    description: "Joined model containing profile details with profile metadata from dtc_profiles."
+    columns:
+      - name: id
+        description: "Surrogate key for the profile details record."
+        data_tests:
+          - unique
+          - not_null
+      - name: profile_id
+        description: "Profile ID that matches dtc_profiles.id."
+        data_tests:
+          - not_null
+      - name: username
+        description: "Instagram username."
+      - name: country
+        description: "Country code for the profile."
+      - name: profile_status
+        description: "Status of the profile review process."
+      - name: created_at
+        description: "Timestamp when this record was created."
+        data_tests:
+          - not_null 

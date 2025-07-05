@@ -21,6 +21,22 @@ sources:
             description: "JSONB blob containing the search results."
             data_tests:
               - not_null
+      - name: dtc_raw_instagram_profiles
+        description: "Raw Instagram profile details from Apify scraper."
+        columns:
+          - name: id
+            description: "Primary key for the raw Instagram profiles."
+            data_tests:
+              - unique
+              - not_null
+          - name: profile_id
+            description: "Profile ID that matches dtc_profiles.id."
+            data_tests:
+              - not_null
+          - name: data
+            description: "JSONB blob containing the Instagram profile details."
+            data_tests:
+              - not_null
 
 models:
   - name: stg_google_search_results
@@ -55,5 +71,18 @@ models:
           - not_null
       - name: keyword_id
         description: "Foreign key to the dtc_keywords table."
+        data_tests:
+          - not_null
+
+  - name: stg_instagram_profiles
+    description: "Staging model for raw Instagram profiles data. Renames columns for clarity."
+    columns:
+      - name: instagram_profile_id
+        description: "Primary key for the raw Instagram profiles."
+        data_tests:
+          - unique
+          - not_null
+      - name: profile_id
+        description: "Profile ID that matches dtc_profiles.id."
         data_tests:
           - not_null 
