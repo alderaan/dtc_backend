@@ -30,7 +30,7 @@ models:
         data_tests:
           - not_null
 
-  - name: dt_profile_details
+  - name: dtc_profile_details
     description: "Final model containing detailed Instagram profile information from scraping."
     columns:
       - name: id
@@ -93,25 +93,4 @@ models:
         data_tests:
           - not_null
 
-  - name: dt_profile_details_with_profiles
-    description: "Joined model containing profile details with profile metadata from dtc_profiles."
-    columns:
-      - name: id
-        description: "Surrogate key for the profile details record."
-        data_tests:
-          - unique
-          - not_null
-      - name: profile_id
-        description: "Profile ID that matches dtc_profiles.id."
-        data_tests:
-          - not_null
-      - name: username
-        description: "Instagram username."
-      - name: country
-        description: "Country code for the profile."
-      - name: profile_status
-        description: "Status of the profile review process."
-      - name: created_at
-        description: "Timestamp when this record was created."
-        data_tests:
-          - not_null 
+ 
