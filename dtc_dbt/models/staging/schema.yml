@@ -1,9 +1,9 @@
 version: 2
 
 sources:
-  - name: public
+  - name: dtc
     database: postgres
-    schema: public
+    schema: dtc
     tables:
       - name: dtc_raw_google_search_results
         description: "Raw Google search results from Apify scraper."

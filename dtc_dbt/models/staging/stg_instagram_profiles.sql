@@ -1,6 +1,6 @@
 WITH source AS (
 
-    SELECT * FROM {{ source('public', 'dtc_raw_instagram_profiles') }}
+    SELECT * FROM {{ source('dtc', 'dtc_raw_instagram_profiles') }}
 
 ),
 
