@@ -5,25 +5,24 @@
     )
 }}
 
-WITH extracted_profiles AS (
+WITH source AS (
+    -- Get the raw profiles from the staging table
     SELECT DISTINCT
-        username,
-        country_code
-    FROM {{ ref('google_search_instagram_profiles') }}
+        dtc_raw_instagram_profile_id,
+        username
+    FROM {{ ref('stg_instagram_profiles') }}
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['username']) }} as id,
+    {{ dbt_utils.generate_surrogate_key(['dtc_raw_instagram_profile_id']) }} as id,
+    dtc_raw_instagram_profile_id,
     username,
-    country_code as country,
-    'pending_review'::public.dtc_profile_status as status,
-    now() as created_at,
-    now() as updated_at
+    'https://www.instagram.com/' || username AS profile_url
 FROM
-    extracted_profiles
+    source
 
 {% if is_incremental() %}
 
-  WHERE username NOT IN (SELECT username FROM {{ this }})
+  WHERE dtc_raw_instagram_profile_id NOT IN (SELECT dtc_raw_instagram_profile_id FROM {{ this }})
 
 {% endif %} 
