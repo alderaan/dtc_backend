@@ -4,7 +4,7 @@ WITH organic_results AS (
 
 url_parts AS (
     SELECT
-        keyword_id,
+        search_term_id,
         country_code,
         url,
         split_part(url, '?', 1) AS url_without_query,
@@ -15,7 +15,7 @@ url_parts AS (
 
 extracted_usernames AS (
     SELECT
-        keyword_id,
+        search_term_id,
         country_code,
         url,
         CASE
@@ -33,7 +33,7 @@ extracted_usernames AS (
 
 SELECT DISTINCT
     username,
-    keyword_id,
+    search_term_id,
     country_code
 FROM
     extracted_usernames
