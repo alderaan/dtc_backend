@@ -20,7 +20,7 @@ dtc_profiles AS (
         id as profile_id,
         username
     FROM
-        {{ ref('dtc_profiles')}}
+        {{ ref('profiles')}}
 )
 
 SELECT DISTINCT
