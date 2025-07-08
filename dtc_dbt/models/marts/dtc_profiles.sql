@@ -16,7 +16,7 @@ SELECT
     {{ dbt_utils.generate_surrogate_key(['username']) }} as id,
     username,
     country_code as country,
-    'pending_review'::dtc.dtc_profile_status as status,
+    'pending_review'::public.dtc_profile_status as status,
     now() as created_at,
     now() as updated_at
 FROM
