@@ -5,24 +5,21 @@
     )
 }}
 
-WITH source AS (
-    -- Get the raw profiles from the staging table
+WITH extracted_profiles AS (
     SELECT DISTINCT
-        dtc_raw_instagram_profile_id,
         username
-    FROM {{ ref('stg_instagram_profiles') }}
+    FROM {{ ref('google_search_instagram_profiles') }}
 )
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['dtc_raw_instagram_profile_id']) }} as id,
-    dtc_raw_instagram_profile_id,
+    {{ dbt_utils.generate_surrogate_key(['username']) }} as id,
     username,
     'https://www.instagram.com/' || username AS profile_url
 FROM
-    source
+    extracted_profiles
 
 {% if is_incremental() %}
 
-  WHERE dtc_raw_instagram_profile_id NOT IN (SELECT dtc_raw_instagram_profile_id FROM {{ this }})
+  WHERE username NOT IN (SELECT username FROM {{ this }})
 
 {% endif %} 
