@@ -46,16 +46,16 @@ final AS (
         p.id AS profile_id,
         p.username,
         p.profile_url,
-        lpd.full_name,
-        lpd.biography,
-        lpd.followers_count,
-        lpd.posts_count,
-        lpd.is_private,
-        lpd.is_verified,
-        lpd.external_url,
-        lpd.created_at AS last_scraped_at,
+        MAX(lpd.full_name) AS full_name,
+        MAX(lpd.biography) AS biography,
+        MAX(lpd.followers_count) AS followers_count,
+        MAX(lpd.posts_count) AS posts_count,
+        MAX(lpd.is_private) AS is_private,
+        MAX(lpd.is_verified) AS is_verified,
+        MAX(lpd.external_url) AS external_url,
+        MAX(lpd.created_at) AS last_scraped_at,
         ARRAY_AGG(DISTINCT st.search_term_en) AS search_terms,
-        lc.country_code AS country
+        MAX(lc.country_code) AS country
     FROM profiles p
     LEFT JOIN latest_profile_details lpd
         ON p.username = lpd.username AND lpd.rn = 1
