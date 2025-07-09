@@ -62,7 +62,7 @@ final AS (
     LEFT JOIN profile_search_terms pst ON p.id = pst.profile_id
     LEFT JOIN search_terms st ON pst.search_term_id = st.search_term_id
     LEFT JOIN latest_country lc ON p.username = lc.username AND lc.rn = 1
-    GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
+    GROUP BY p.id, p.username, p.profile_url
 )
 
 SELECT * FROM final 
