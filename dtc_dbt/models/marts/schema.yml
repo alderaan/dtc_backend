@@ -126,5 +126,9 @@ models:
         description: "Most recent post count."
       - name: last_scraped_at
         description: "Timestamp of the last scrape for this profile."
+      - name: search_terms
+        description: "Array of all English search terms (search_term_en) under which this profile was found."
+      - name: country
+        description: "Country code from the most recent search event that found this profile."
 
  
