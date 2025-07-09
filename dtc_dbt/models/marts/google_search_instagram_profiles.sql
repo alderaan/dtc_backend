@@ -1,3 +1,9 @@
+{{
+    config(
+        materialized='table'
+    )
+}}
+
 WITH organic_results AS (
     SELECT * FROM {{ ref('stg_google_search_organic_results') }}
 ),

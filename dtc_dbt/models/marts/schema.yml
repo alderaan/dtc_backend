@@ -28,10 +28,15 @@ models:
         description: "Extracted Instagram username."
         data_tests:
           - not_null
-      - name: keyword_id
-        description: "Foreign key to the dtc_keywords table."
+      - name: search_term_id
+        description: "Foreign key to the search_terms snapshot table."
         data_tests:
           - not_null
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - username
+            - search_term_id
 
   - name: profile_details
     description: "Historical fact table containing detailed Instagram profile information from every scrape."
